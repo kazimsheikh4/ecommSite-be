@@ -1,0 +1,21 @@
+const express = require("express");
+const router = express.Router();
+const {
+  getProducts,
+  getProduct,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} = require("../controllers/productControllers");
+
+router.route("/").get(getProducts).post(addProduct);
+
+router.route("/:id").get(getProduct).put(updateProduct).delete(deleteProduct);
+
+//We can write them collectively if the path is same
+// router.route("/").get(getProducts);
+// router.route("/").post(addProduct);
+// router.route("/:id").put(updateProduct);
+// router.route("/:id").delete(deleteProduct);
+
+module.exports = router;
