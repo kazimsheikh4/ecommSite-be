@@ -5,7 +5,7 @@ const Product = require("../models/productModel");
 //@route GET /api/products
 //@access public
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find();
+  const products = await Product.find({ user_id: req.user.id });
   res.status(200).json(products);
 });
 
@@ -19,7 +19,13 @@ const addProduct = asyncHandler(async (req, res) => {
     res.sendStatus(400);
     throw new Error("All fields are mandatory!");
   }
-  const product = await Product.create({ name, price, size, type });
+  const product = await Product.create({
+    name,
+    price,
+    size,
+    type,
+    user_id: req.user.id,
+  });
   res.status(201).json(product);
 });
 
@@ -28,9 +34,14 @@ const addProduct = asyncHandler(async (req, res) => {
 //@access public
 const getProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
+  console.log("product", product, product.user_id.toString(), req.user.id);
   if (!product) {
     res.status(404);
     throw new Error("Product not found");
+  }
+  if (product.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User dont have permission to update this product");
   }
   res.status(200).json(product);
 });
@@ -43,6 +54,10 @@ const updateProduct = asyncHandler(async (req, res) => {
   if (!product) {
     res.status(404);
     throw new Error("Product not found");
+  }
+  if (product.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User dont have permission to update this product");
   }
 
   const updatedContact = await Product.findByIdAndUpdate(
@@ -57,12 +72,19 @@ const updateProduct = asyncHandler(async (req, res) => {
 //@route Delete /api/products/:id
 //@access public
 const deleteProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findOneAndDelete({_id: req.params.id});
+  const product = await Product.findById(req.params.id);
   if (!product) {
     res.status(404);
     throw new Error("Product not found");
   }
-  res.status(200).json(product);
+
+  if (product.user_id.toString() !== req.user.id) {
+    res.status(403);
+    throw new Error("User doesn't have permission to update this product");
+  }
+
+  await Product.deleteOne({ _id: req.params.id });
+  res.status(200).json({ message: "Product deleted successfully" });
 });
 
 module.exports = {
