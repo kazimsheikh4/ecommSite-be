@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const productRoutes = require("./routes/productRoutes");
 const userRoutes = require("./routes/userRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const connectDb = require("./config/dbConnection");
 
@@ -16,6 +17,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/category",categoryRoutes);
 app.use(errorHandler);
 
 app.listen(port, () => {
