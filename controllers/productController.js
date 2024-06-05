@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
-
+const ProductLib = require("../lib/productLib");
 //@desc Get  all products
 //@route GET /api/products
 //@access public
@@ -13,7 +13,6 @@ const getProducts = asyncHandler(async (req, res) => {
 //@route POST /api/products
 //@access public
 const addProduct = asyncHandler(async (req, res) => {
-  console.log("req is:", req.body);
   const { name, size, price, type } = req.body;
   if (!name || !size || !price) {
     res.sendStatus(400);
@@ -33,40 +32,36 @@ const addProduct = asyncHandler(async (req, res) => {
 //@route POST /api/products/:id
 //@access public
 const getProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  console.log("product", product, product.user_id.toString(), req.user.id);
-  if (!product) {
-    res.status(404);
-    throw new Error("Product not found");
+  try {
+    const product = await ProductLib.findOne({
+      _id: req.params.id,
+      user_id: req.user.id,
+    });
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ error: error.Error || "invalid product Id" });
   }
-  if (product.user_id.toString() !== req.user.id) {
-    res.status(403);
-    throw new Error("User dont have permission to update this product");
-  }
-  res.status(200).json(product);
 });
 
 //@desc  update a product
 //@route PUT /api/products/:id
 //@access public
-const updateProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  if (!product) {
-    res.status(404);
-    throw new Error("Product not found");
-  }
-  if (product.user_id.toString() !== req.user.id) {
-    res.status(403);
-    throw new Error("User dont have permission to update this product");
-  }
+const updateProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const userId = req.user.id;
 
-  const updatedContact = await Product.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
-  res.status(200).json(updatedContact);
-});
+    const updatedProduct = await ProductLib.findOneAndUpdate(
+      { _id: productId, user_id: userId },
+      req.body,
+      { new: true }
+    );
+
+    return res.status(200).json(updatedProduct);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 //@desc  Delete a product
 //@route Delete /api/products/:id
