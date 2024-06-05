@@ -27,21 +27,42 @@ const addProduct = asyncHandler(async (req, res) => {
 //@route POST /api/products/:id
 //@access public
 const getProduct = asyncHandler(async (req, res) => {
-  res.status(200).json({ products: `Update product for ${req.params.id}` });
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+  res.status(200).json(product);
 });
 
 //@desc  update a product
 //@route PUT /api/products/:id
 //@access public
 const updateProduct = asyncHandler(async (req, res) => {
-  res.status(200).json({ products: `Update product for ${req.params.id}` });
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  const updatedContact = await Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+  res.status(200).json(updatedContact);
 });
 
 //@desc  Delete a product
 //@route Delete /api/products/:id
 //@access public
 const deleteProduct = asyncHandler(async (req, res) => {
-  res.status(200).json({ products: `Delete product for ${req.params.id}` });
+  const product = await Product.findOneAndDelete({_id: req.params.id});
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+  res.status(200).json(product);
 });
 
 module.exports = {
