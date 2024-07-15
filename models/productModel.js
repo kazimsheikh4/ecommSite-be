@@ -7,6 +7,11 @@ const productSchema = new Schema(
       required: true,
       ref: "User",
     },
+    category_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Category",
+    },
     name: {
       type: String,
       required: ["true", "Please add the product name"],

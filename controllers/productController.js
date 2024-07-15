@@ -13,12 +13,13 @@ const getProducts = asyncHandler(async (req, res) => {
 //@route POST /api/products
 //@access public
 const addProduct = asyncHandler(async (req, res) => {
-  const { name, size, price, type } = req.body;
+  const { category_id, name, size, price, type } = req.body;
   if (!name || !size || !price) {
     res.sendStatus(400);
     throw new Error("All fields are mandatory!");
   }
   const product = await Product.create({
+    category_id,
     name,
     price,
     size,
@@ -82,10 +83,40 @@ const deleteProduct = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Product deleted successfully" });
 });
 
+const getProductsByCategory = async (req, res) => {
+  try {
+    const categoryId = req.params.categoryId;
+    const userId = req.user.id;
+    const products = await Product.find({ category_id: categoryId });
+
+    if (products.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No products found for this category" });
+    }
+    const productsWithoutUserId = products.map((product) => {
+      const { user_id, category_id, ...productWithoutUserId } =
+        product.toObject();
+      return productWithoutUserId;
+    });
+
+    return res
+      .status(200)
+      .json({
+        user_id: userId,
+        category_id: categoryId,
+        products: productsWithoutUserId,
+      });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getProducts,
   getProduct,
   addProduct,
   updateProduct,
   deleteProduct,
+  getProductsByCategory,
 };
