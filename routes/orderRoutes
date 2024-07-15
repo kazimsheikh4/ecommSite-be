@@ -1,0 +1,23 @@
+const express = require("express");
+const validateToken = require("../middleware/validateTokenHandler");
+const router = express.Router();
+const {
+  getUserOrders,
+  getUserOrdersByStatus,
+  getOrdersByStatus,
+  getOrders,
+  addUserOrder,
+  getOrderById,
+  updateOrderById,
+  deleteOrder,
+} = require("../controllers/orderController");
+
+router.use(validateToken);
+
+router.route("/").get(getUserOrders).get(getOrders);
+router.route("/").post(addUserOrder);
+router.route("/status/:status").get(getUserOrdersByStatus);
+router.route("/admin/status/:status").get(getOrdersByStatus);
+router.route("/:id").get(getOrderById).put(updateOrderById).delete(deleteOrder);
+
+module.exports = router;
