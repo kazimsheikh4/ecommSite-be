@@ -1,0 +1,22 @@
+const express = require("express");
+const validateToken = require("../middleware/validateTokenHandler");
+const router = express.Router();
+const {
+  getCategories,
+  getCategory,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+} = require("../controllers/categoryController");
+
+router.use(validateToken);
+
+router.route("/").get(getCategories);
+router.route("/").post(addCategory);
+router
+  .route("/:id")
+  .get(getCategory)
+  .put(updateCategory)
+  .delete(deleteCategory);
+
+module.exports = router;

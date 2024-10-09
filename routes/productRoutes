@@ -6,11 +6,16 @@ const {
   addProduct,
   updateProduct,
   deleteProduct,
-} = require("../controllers/productControllers");
+  getProductsByCategory,
+} = require("../controllers/productController");
+const validateToken = require("../middleware/validateTokenHandler");
 
+router.use(validateToken);
 router.route("/").get(getProducts).post(addProduct);
 
 router.route("/:id").get(getProduct).put(updateProduct).delete(deleteProduct);
+
+router.route("/category/:categoryId").get(getProductsByCategory)
 
 //We can write them collectively if the path is same
 // router.route("/").get(getProducts);
